@@ -25,7 +25,7 @@ create policy "read own profile" on public.profiles for select using (id = auth.
 create policy "update own profile" on public.profiles for update using (id = auth.uid()) with check (id = auth.uid());
 
 -- Users may not promote themselves to admin.
-create function public.protect_admin_flag() returns trigger language plpgsql as $$
+create function public.protect_admin_flag() returns trigger language plpgsql set search_path = public as $$
 begin
   if new.is_admin is distinct from old.is_admin and current_user in ('anon', 'authenticated') then
     raise exception 'is_admin can only be changed by an administrator';
@@ -157,7 +157,7 @@ create policy "admins read reports" on public.reports for select using (public.i
 
 -- ---------------------------------------------------------------- moderation screen
 -- Mirrors src/lib/moderation.ts. Keep the two in step; tests cover both.
-create function public.screen_text(t text) returns text[] language plpgsql immutable as $$
+create function public.screen_text(t text) returns text[] language plpgsql immutable set search_path = public as $$
 declare
   f text[] := '{}';
   l text := lower(t);
@@ -178,7 +178,7 @@ begin
 end $$;
 
 -- Flags that keep a request off the feed until an admin approves it.
-create function public.holding_flags(f text[]) returns boolean language sql immutable as $$
+create function public.holding_flags(f text[]) returns boolean language sql immutable set search_path = public as $$
   select f && array['contact-info', 'link', 'money']
 $$;
 
