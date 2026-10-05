@@ -42,10 +42,12 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 -- ---------------------------------------------------------------- circles
+-- Invite codes come from gen_random_uuid (core Postgres) because Supabase keeps pgcrypto in the
+-- extensions schema, outside these functions' search_path.
 create table public.circles (
   id uuid primary key default gen_random_uuid(),
   name text not null check (char_length(name) between 3 and 60),
-  invite_code text not null unique default encode(gen_random_bytes(6), 'hex'),
+  invite_code text not null unique default left(replace(gen_random_uuid()::text, '-', ''), 12),
   created_by uuid references auth.users (id) on delete set null,
   created_at timestamptz not null default now()
 );
@@ -162,7 +164,7 @@ language plpgsql security definer set search_path = public as $$
 declare code text;
 begin
   if not public.is_circle_leader(p_circle) then raise exception 'Only circle leaders can make a new invitation link.'; end if;
-  update circles set invite_code = encode(gen_random_bytes(6), 'hex') where id = p_circle returning invite_code into code;
+  update circles set invite_code = left(replace(gen_random_uuid()::text, '-', ''), 12) where id = p_circle returning invite_code into code;
   return code;
 end $$;
 
