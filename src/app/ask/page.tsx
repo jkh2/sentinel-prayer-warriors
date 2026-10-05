@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getViewer } from "@/lib/supabase/server";
+import type { Circle } from "@/lib/types";
 import { Guide } from "@/components/Guide";
 import { AskForm } from "./AskForm";
 import { TurnOnRole } from "./TurnOnRole";
 
 export const metadata: Metadata = { title: "Ask for prayer" };
 
-export default async function AskPage() {
+export default async function AskPage({ searchParams }: PageProps<"/ask">) {
+  const sp = await searchParams;
   const { supabase, user, profile } = await getViewer();
-  const { data: interests } = await supabase.from("interests").select("label").eq("status", "approved").order("label");
+  const [{ data: interests }, { data: circles }] = await Promise.all([
+    supabase.from("interests").select("label").eq("status", "approved").order("label"),
+    user ? supabase.rpc("my_circles") : Promise.resolve({ data: [] }),
+  ]);
   return (
     <div className="stack-lg" style={{ maxWidth: 720 }}>
       <div className="hero">
@@ -30,12 +35,17 @@ export default async function AskPage() {
         <div className="card stack">
           <h2>First, sign in</h2>
           <p>Signing in keeps the feed safe from spam and lets you see who has prayed for you. Your name and email are never shown.</p>
-          <Link href="/login?next=/ask" className="btn btn-primary btn-big">Sign in with Google or Facebook</Link>
+          <Link href="/login?next=/ask" className="btn btn-primary btn-big">Sign in</Link>
         </div>
       ) : !profile?.is_requester ? (
         <TurnOnRole />
       ) : (
-        <AskForm interests={(interests ?? []).map((i) => i.label)} firstName={profile.first_name ?? ""} />
+        <AskForm
+          interests={(interests ?? []).map((i) => i.label)}
+          firstName={profile.first_name ?? ""}
+          circles={((circles ?? []) as Circle[]).map((c) => ({ id: c.id, name: c.name }))}
+          initialCircle={typeof sp.circle === "string" ? sp.circle : null}
+        />
       )}
     </div>
   );

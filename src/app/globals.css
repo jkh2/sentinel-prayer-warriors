@@ -166,3 +166,33 @@ table.admin { width: 100%; border-collapse: collapse; }
 @media (max-width: 640px) { .mark-hero { grid-template-columns: 1fr; justify-items: center; text-align: center; } .mark-hero img { max-width: 180px; } .mark-hero p { margin-inline: auto; } }
 .gold-rule { height: 1px; border: 0; background: linear-gradient(90deg, transparent, var(--gold-deep), var(--gold-bright), var(--gold-deep), transparent); margin: 0; }
 @media (max-width: 480px) { .brand-name { font-size: 1.05rem; } .site-header .bar .btn { min-height: 44px; padding-inline: 16px; } .nav a { padding: 8px 12px; } }
+
+/* inbox */
+.inbox-link { position: relative; color: var(--gold-bright); }
+.unread { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 7px; border-radius: 999px; background: var(--gold-metal); color: var(--accent-ink); font-size: .85rem; font-weight: 700; box-shadow: var(--glow); }
+.note { display: grid; gap: 4px; text-decoration: none; color: inherit; border-left: 4px solid var(--line); }
+.note.unread-note { border-left-color: var(--gold); background: var(--accent-soft); }
+.note .when { color: var(--muted); font-size: .88rem; }
+
+/* The Watch */
+.watch-now { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.watch-now .big { font-family: var(--font-display); font-size: 2.4rem; line-height: 1; background: var(--gold-metal); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hour-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 10px; }
+.hour { display: grid; gap: 2px; text-align: left; padding: 12px 14px; min-height: 72px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); cursor: pointer; }
+.hour strong { font-size: 1.05rem; }
+.hour span { font-size: .88rem; color: var(--muted); }
+.hour.empty-hour { border-style: dashed; }
+.hour.empty-hour span { color: var(--urgent); }
+.hour.covered { background: linear-gradient(180deg, #1d170b, var(--surface)); }
+.hour.now { outline: 3px solid var(--prayed); outline-offset: 2px; }
+.hour[aria-pressed="true"] { background: var(--gold-metal); border-color: #e0a92e; box-shadow: var(--glow); }
+.hour[aria-pressed="true"] strong, .hour[aria-pressed="true"] span { color: var(--accent-ink); }
+.day-bar { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; height: 28px; }
+.day-bar i { border-radius: 3px; background: var(--surface-2); }
+.day-bar i.c1 { background: #6b4c10; } .day-bar i.c2 { background: #b07d16; } .day-bar i.c3 { background: var(--gold); }
+.day-bar i.now { outline: 2px solid var(--prayed); }
+.progress-dots { display: flex; gap: 6px; }
+.progress-dots i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--gold-deep); }
+.progress-dots i.done { background: var(--gold-metal); border-color: var(--gold); }
+.progress-dots i.today { outline: 2px solid var(--prayed); outline-offset: 1px; }
+.invite { font-family: ui-monospace, Menlo, monospace; overflow-wrap: anywhere; background: var(--surface-2); padding: 10px 12px; border-radius: 10px; }

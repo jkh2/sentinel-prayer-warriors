@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/supabase/server";
 import { timeAgo, type PrayerRequest } from "@/lib/types";
 import { RequestCard } from "@/components/RequestCard";
+import { loadCarrying } from "@/lib/carrying";
+import { StopCarrying } from "./StopCarrying";
 
 export const metadata: Metadata = { title: "My Prayers" };
 
@@ -12,10 +14,11 @@ type Inbox = { request_id: string; display_name: string; request_body: string; k
 export default async function MePage() {
   const { supabase, user, profile } = await getViewer();
   if (!user || !profile) redirect("/login?next=/me");
-  const [{ data: mine }, { data: inbox }, { count }] = await Promise.all([
+  const [{ data: mine }, { data: inbox }, { count }, carrying] = await Promise.all([
     supabase.rpc("my_requests"),
     supabase.rpc("updates_for_me", { p_limit: 30 }),
     supabase.from("prayers").select("request_id", { count: "exact", head: true }).eq("warrior_id", user.id),
+    loadCarrying(supabase),
   ]);
   const requests = (mine ?? []) as PrayerRequest[];
   const updates = (inbox ?? []) as Inbox[];
@@ -28,6 +31,29 @@ export default async function MePage() {
         {profile.is_warrior && <div className="card" style={{ flex: "1 1 220px" }}><span className="muted">You have prayed for</span><strong style={{ fontSize: "1.6rem" }}>{count ?? 0} {count === 1 ? "person" : "people"}</strong></div>}
         {profile.is_requester && <div className="card" style={{ flex: "1 1 220px" }}><span className="muted">Prayers lifted for you</span><strong style={{ fontSize: "1.6rem" }}>{prayedForMe}</strong></div>}
       </div>
+
+      {carrying.length > 0 && (
+        <section className="stack">
+          <h2>People you’re carrying this week</h2>
+          <p className="muted">You promised to pray for these people once a day for 7 days.</p>
+          {carrying.map((c) => (
+            <div key={c.id} className="card">
+              <div className="request-head">
+                <span className="request-who">{c.who}</span>
+                <span className="request-meta">Day {c.day} of 7 · prayed on {c.daysPrayed} {c.daysPrayed === 1 ? "day" : "days"}</span>
+                {c.prayedToday && <span className="badge badge-answered">Prayed today</span>}
+              </div>
+              <p className="request-body" style={{ display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{c.body}</p>
+              <div className="row">
+                <Link href={`/r/${c.id}`} className={`btn ${c.prayedToday ? "btn-prayed" : "btn-primary"}`}>
+                  {c.prayedToday ? "You prayed today ✓" : `Pray for ${c.who} today`}
+                </Link>
+                <StopCarrying requestId={c.id} />
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
 
       {profile.is_warrior && (
         <section className="stack">

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/ProfileForm";
 import { ShowGuidesAgain } from "@/components/Guide";
+import { DeleteAccount } from "./DeleteAccount";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -19,6 +20,8 @@ export default async function SettingsPage() {
         <p className="muted">If you hid the blue “how this works” boxes, you can bring them back here.</p>
         <div><ShowGuidesAgain /></div>
       </section>
+      <hr className="gold-rule" />
+      <DeleteAccount />
     </div>
   );
 }

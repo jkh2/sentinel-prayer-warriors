@@ -12,6 +12,11 @@ A place for people who want to pray for others to see specific needs, and for pe
 - **Interests.** 27 built-in kinds of need. People can suggest more, which appear after review.
 - **Safety from day one.** Every request is screened in the database (`public.screen_text`). Contact details, links and money requests wait for review. Crisis language shows crisis lines (988, domestic violence hotline, 911) to the requester and on the request. Three reports hide a request until a reviewer looks. Requests expire after 30 days. Each person can post at most 5 requests a day.
 - **Faith with works.** Food, housing, job and disaster requests show 211, food bank and findhelp.org links.
+- **The Watch.** Warriors keep weekly prayer hours in their own time zone. Everyone can see how many are on watch now and which hours still need someone; a warrior's own hour shows a reminder on the home page (`src/lib/watch.ts`).
+- **Adopt a person.** After praying, a warrior can carry someone for 7 days. My Prayers and the home page remind them each day, and the requester sees that people are praying all week.
+- **Inbox.** In-app notes when people pray for your request (at milestones), when someone adopts it, when someone you prayed for posts an update or praise report, when a held request is approved, and when a circle gets a new request.
+- **Circles.** Private prayer walls for churches, small groups and families, joined by invitation link. Circle requests are visible only to members (enforced by RLS). Leaders can remove members and requests and make a new link.
+- **Account deletion** in Settings, with a privacy page and terms (`/privacy`, `/terms`).
 - **Built for everyone.** Large Atkinson Hyperlegible text, big buttons, plain words, and step-by-step guides on every main page that people can hide and bring back in Settings.
 
 ## Privacy model
@@ -22,7 +27,7 @@ A place for people who want to pray for others to see specific needs, and for pe
 
 1. Create a Supabase project and run `supabase/migrations/*.sql` (with the Supabase CLI: `supabase db push`).
 2. In Supabase **Authentication → Providers**, turn on **Google** and **Facebook**. Each needs an OAuth app from Google Cloud Console and Meta for Developers. Add `https://<your-domain>/auth/callback` to the allowed redirect URLs.
-3. Copy `.env.example` to `.env.local` and fill in the project URL and publishable key.
+3. Copy `.env.example` to `.env.local` and fill in the project URL and publishable key. Set `NEXT_PUBLIC_FACEBOOK_LOGIN=on` once Facebook is enabled, and `NEXT_PUBLIC_CONTACT_EMAIL` for the privacy page.
 4. `npm install` then `npm run dev`.
 5. Make yourself a reviewer by running `update public.profiles set is_admin = true where id = '<your user id>';` in the SQL editor.
 6. Deploy to Vercel with the same two environment variables.
@@ -34,8 +39,5 @@ A place for people who want to pray for others to see specific needs, and for pe
 
 ## Next up
 
-- **The Watch:** warriors sign up for prayer hours so the feed is covered around the clock
-- **Adopt a person** for 7 days, with daily reminders
-- **Notifications** (email or push) for praise reports and My Three reminders
-- **Circles:** private walls for churches and small groups
+- **Email notifications** on top of the Inbox (needs a sending service such as Resend)
 - Phone apps for the app stores

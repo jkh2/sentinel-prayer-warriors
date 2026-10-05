@@ -7,7 +7,11 @@ import { CRISIS_LINES } from "@/lib/help";
 
 type Done = { id: string; status: string; flags: string[] };
 
-export function AskForm({ interests, firstName }: { interests: string[]; firstName: string }) {
+export function AskForm({ interests, firstName, circles, initialCircle }: {
+  interests: string[]; firstName: string; circles: { id: string; name: string }[]; initialCircle: string | null;
+}) {
+  const [circleId, setCircleId] = useState<string | null>(circles.some((c) => c.id === initialCircle) ? initialCircle : null);
+  const circleName = circles.find((c) => c.id === circleId)?.name;
   const [body, setBody] = useState("");
   const [cats, setCats] = useState<string[]>([]);
   const [name, setName] = useState(firstName);
@@ -25,7 +29,7 @@ export function AskForm({ interests, firstName }: { interests: string[]; firstNa
     e.preventDefault();
     if (body.trim().length < 10) { setError("Please write at least one full sentence so people know how to pray."); return; }
     setBusy(true); setError("");
-    const res = await submitRequest({ body: body.trim(), categories: cats, displayName: name, place, anonymous, urgent });
+    const res = await submitRequest({ body: body.trim(), categories: cats, displayName: name, place, anonymous, urgent, circleId });
     setBusy(false);
     if (res.ok && res.data) setDone(res.data); else if (!res.ok) setError(res.error);
   };
@@ -40,11 +44,13 @@ export function AskForm({ interests, firstName }: { interests: string[]; firstNa
           </section>
         )}
         <div className="card stack">
-          <h2>{done.status === "held" ? "Thank you. Your request is waiting for a quick review." : "Your request is on the prayer feed"}</h2>
+          <h2>{done.status === "held" ? "Thank you. Your request is waiting for a quick review." : circleName ? `Your request is on the ${circleName} wall` : "Your request is on the prayer feed"}</h2>
           <p>
             {done.status === "held"
               ? "It mentions contact details, a link, or money, so a person will check it before it appears. This protects everyone from scams."
-              : "People are seeing it now. You can come back any time to see how many have prayed and to share a praise report."}
+              : circleName
+                ? "Everyone in your circle has been told. You can come back any time to see how many have prayed and to share a praise report."
+                : "People are seeing it now. You can come back any time to see how many have prayed and to share a praise report."}
           </p>
           <div className="row">
             <Link href={`/r/${done.id}`} className="btn btn-primary">See my request</Link>
@@ -81,6 +87,21 @@ export function AskForm({ interests, firstName }: { interests: string[]; firstNa
 
       <div className="field">
         <span className="step-label">Step 3 of 4</span>
+        {circles.length > 0 && (
+          <div className="field">
+            <span className="label" id="who-label">Who should see it?</span>
+            <div className="choice-grid" role="group" aria-labelledby="who-label">
+              <button type="button" className="choice" aria-pressed={circleId === null} onClick={() => setCircleId(null)}>
+                <strong>Everyone</strong><span className="muted">The public prayer feed, where any prayer warrior can pray.</span>
+              </button>
+              {circles.map((c) => (
+                <button type="button" key={c.id} className="choice" aria-pressed={circleId === c.id} onClick={() => setCircleId(c.id)}>
+                  <strong>Only {c.name}</strong><span className="muted">Private to your circle. Members get a note in their Inbox.</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <span className="label">How should we show your name?</span>
         <label className="check">
           <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} />

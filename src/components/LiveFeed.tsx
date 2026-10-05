@@ -14,7 +14,10 @@ const FILTERS: { id: Filter; label: string }[] = [
   { id: "answered", label: "Answered prayers" },
 ];
 
-export function LiveFeed({ initial, prayed, interests }: { initial: PrayerRequest[]; prayed: string[]; interests: string[] }) {
+// circleId: null shows the public feed; a circle's id shows only that circle's wall.
+export function LiveFeed({ initial, prayed, interests, circleId = null }: {
+  initial: PrayerRequest[]; prayed: string[]; interests: string[]; circleId?: string | null;
+}) {
   const [shown, setShown] = useState<PrayerRequest[]>(initial);
   const [waiting, setWaiting] = useState<PrayerRequest[]>([]);
   const [fresh, setFresh] = useState<Set<string>>(new Set());
@@ -26,9 +29,10 @@ export function LiveFeed({ initial, prayed, interests }: { initial: PrayerReques
   useEffect(() => {
     const supabase = createClient();
     const channel = supabase
-      .channel("feed")
+      .channel(circleId ? `circle-${circleId}` : "feed")
       .on("postgres_changes", { event: "*", schema: "public", table: "prayer_requests" }, (payload) => {
         const row = payload.new as PrayerRequest;
+        if ((row.circle_id ?? null) !== circleId) return;
         if (payload.eventType === "INSERT" && row.status === "published") {
           // New requests wait above the list instead of pushing it down while someone is reading.
           setWaiting((w) => (w.some((x) => x.id === row.id) ? w : [row, ...w]));
@@ -42,7 +46,7 @@ export function LiveFeed({ initial, prayed, interests }: { initial: PrayerReques
       })
       .subscribe((status) => setConnected(status === "SUBSCRIBED"));
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [circleId]);
 
   const showWaiting = () => {
     setFresh(new Set(waiting.map((w) => w.id)));
@@ -88,8 +92,8 @@ export function LiveFeed({ initial, prayed, interests }: { initial: PrayerReques
           ) : filter === "all" ? (
             <>
               <h2>No requests yet</h2>
-              <p>Be the first. Anyone can ask for prayer.</p>
-              <Link className="btn btn-primary" href="/ask">Ask for prayer</Link>
+              <p>{circleId ? "Be the first to share a request with your circle." : "Be the first. Anyone can ask for prayer."}</p>
+              <Link className="btn btn-primary" href={circleId ? `/ask?circle=${circleId}` : "/ask"}>Ask for prayer</Link>
             </>
           ) : (
             <>

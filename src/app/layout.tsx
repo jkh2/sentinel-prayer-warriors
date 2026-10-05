@@ -3,6 +3,7 @@ import { Atkinson_Hyperlegible_Next, Young_Serif } from "next/font/google";
 import Link from "next/link";
 import { getViewer } from "@/lib/supabase/server";
 import { Nav } from "@/components/Nav";
+import { BellIcon } from "@/components/icons";
 import Image from "next/image";
 import "./globals.css";
 
@@ -17,7 +18,8 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const { user, profile } = await getViewer();
+  const { supabase, user, profile } = await getViewer();
+  const unread = user ? ((await supabase.rpc("unread_notifications")).data as number | null) ?? 0 : 0;
   return (
     <html lang="en" className={`${body.variable} ${display.variable}`}>
       <body>
@@ -29,9 +31,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <span className="brand-name">Sentinel Prayer Warriors</span>
               </Link>
               {user ? (
-                <form action="/auth/signout" method="post">
-                  <button className="btn btn-quiet" type="submit">Sign out</button>
-                </form>
+                <div className="row" style={{ gap: 4 }}>
+                  <Link href="/inbox" className="btn btn-quiet inbox-link" aria-label={unread ? `Inbox, ${unread} new` : "Inbox"}>
+                    <BellIcon /> Inbox{unread > 0 && <span className="unread">{unread > 99 ? "99+" : unread}</span>}
+                  </Link>
+                  <form action="/auth/signout" method="post">
+                    <button className="btn btn-quiet" type="submit">Sign out</button>
+                  </form>
+                </div>
               ) : (
                 <Link href="/login" className="btn btn-primary">Sign in</Link>
               )}
@@ -47,6 +54,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               In danger or thinking about suicide? In the US call or text <strong>988</strong>, or call <strong>911</strong>.{" "}
               <Link href="/help">Get help and learn how this works</Link>
             </p>
+            <p><Link href="/privacy">Privacy</Link> · <Link href="/terms">Terms</Link></p>
           </div>
         </footer>
       </body>

@@ -4,6 +4,8 @@ import { getViewer } from "@/lib/supabase/server";
 import { FEED_COLUMNS, type PrayerRequest } from "@/lib/types";
 import { Guide } from "@/components/Guide";
 import { LiveFeed } from "@/components/LiveFeed";
+import { TodayPanel } from "@/components/TodayPanel";
+import { loadCarrying, type Carrying } from "@/lib/carrying";
 
 export default async function FeedPage() {
   const { supabase, user, profile } = await getViewer();
@@ -11,13 +13,22 @@ export default async function FeedPage() {
     .from("prayer_requests")
     .select(FEED_COLUMNS)
     .eq("status", "published")
+    .is("circle_id", null)
     .gt("expires_at", new Date().toISOString())
     .order("created_at", { ascending: false })
     .limit(100);
   let prayed: string[] = [];
+  let carrying: Carrying[] = [];
+  let watch: { dow: number; hour: number }[] = [];
   if (user) {
-    const { data: p } = await supabase.from("prayers").select("request_id").eq("warrior_id", user.id).limit(1000);
+    const [{ data: p }, c, { data: w }] = await Promise.all([
+      supabase.from("prayers").select("request_id").eq("warrior_id", user.id).limit(1000),
+      loadCarrying(supabase),
+      supabase.from("watch_hours").select("dow, hour"),
+    ]);
     prayed = (p ?? []).map((x) => x.request_id);
+    carrying = c;
+    watch = (w ?? []) as typeof watch;
   }
   return (
     <div className="stack-lg">
@@ -33,6 +44,7 @@ export default async function FeedPage() {
         </div>
       </div>
       <hr className="gold-rule" />
+      {user && <TodayPanel carrying={carrying} watch={watch} />}
       <Guide
         id="feed"
         title="How to pray for someone"
