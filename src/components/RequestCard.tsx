@@ -24,6 +24,7 @@ export function RequestCard({ r, fresh, matches, prayed, extra }: {
       <div className="request-foot">
         <span className="count">
           <b>{r.prayer_count}</b> {r.prayer_count === 1 ? "person has prayed" : "people have prayed"}
+          {r.adopted_count > 0 && <>, <b>{r.adopted_count}</b> all week</>}
         </span>
         <Link href={`/r/${r.id}`} className={`btn ${prayed ? "btn-prayed" : "btn-primary"} stretch-link`}>
           {prayed ? "You prayed ✓" : `Pray for ${who === "Anonymous" ? "this person" : who}`}

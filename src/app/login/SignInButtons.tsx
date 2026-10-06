@@ -2,6 +2,9 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+// Facebook stays hidden until its login is switched on in Supabase and NEXT_PUBLIC_FACEBOOK_LOGIN=on is set.
+export const FACEBOOK_ON = process.env.NEXT_PUBLIC_FACEBOOK_LOGIN === "on";
+
 export function SignInButtons({ next }: { next: string }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -19,9 +22,11 @@ export function SignInButtons({ next }: { next: string }) {
       <button className="btn btn-big btn-block" onClick={() => go("google")} disabled={!!busy}>
         <GoogleMark /> {busy === "google" ? "Opening Google…" : "Continue with Google"}
       </button>
-      <button className="btn btn-big btn-block" onClick={() => go("facebook")} disabled={!!busy}>
-        <FacebookMark /> {busy === "facebook" ? "Opening Facebook…" : "Continue with Facebook"}
-      </button>
+      {FACEBOOK_ON && (
+        <button className="btn btn-big btn-block" onClick={() => go("facebook")} disabled={!!busy}>
+          <FacebookMark /> {busy === "facebook" ? "Opening Facebook…" : "Continue with Facebook"}
+        </button>
+      )}
       {error && <p className="error" role="alert">{error}</p>}
     </div>
   );

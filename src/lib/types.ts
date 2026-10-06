@@ -11,6 +11,8 @@ export type PrayerRequest = {
   answered_at: string | null;
   created_at: string;
   expires_at: string;
+  circle_id: string | null;
+  adopted_count: number;
 };
 export type RequestUpdate = { id: string; request_id: string; kind: "update" | "praise"; body: string; status: string; created_at: string };
 export type Profile = {
@@ -27,7 +29,14 @@ export type Profile = {
 };
 export type Interest = { slug: string; label: string; status: string };
 
-export const FEED_COLUMNS = "id, body, display_name, place, is_urgent, categories, status, flags, prayer_count, answered_at, created_at, expires_at";
+export type Notification = {
+  id: string; kind: "prayed" | "adopted" | "update" | "praise" | "approved" | "removed" | "circle-request";
+  request_id: string | null; body: string; created_at: string; read_at: string | null;
+};
+export type Circle = { id: string; name: string; role: "leader" | "member"; invite_code: string; member_count: number; request_count: number };
+export type Adoption = { request_id: string; timezone: string; started_on: string; days_prayed: string[] };
+
+export const FEED_COLUMNS = "id, body, display_name, place, is_urgent, categories, status, flags, prayer_count, answered_at, created_at, expires_at, circle_id, adopted_count";
 
 export function timeAgo(iso: string, now = Date.now()) {
   const s = Math.max(1, (now - new Date(iso).getTime()) / 1000);

@@ -7,8 +7,9 @@ export function Nav({ signedIn, isWarrior, isAdmin }: { signedIn: boolean; isWar
   const items = [
     { href: "/", label: "Live Prayer Feed" },
     ...(isWarrior ? [{ href: "/three", label: "My Three" }] : []),
+    { href: "/watch", label: "The Watch" },
     { href: "/ask", label: "Ask for Prayer" },
-    ...(signedIn ? [{ href: "/me", label: "My Prayers" }, { href: "/settings", label: "Settings" }] : []),
+    ...(signedIn ? [{ href: "/circles", label: "Circles" }, { href: "/me", label: "My Prayers" }, { href: "/settings", label: "Settings" }] : []),
     { href: "/help", label: "Help" },
     ...(isAdmin ? [{ href: "/admin", label: "Review" }] : []),
   ];

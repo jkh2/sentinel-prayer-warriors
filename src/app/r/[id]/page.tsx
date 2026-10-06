@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getViewer } from "@/lib/supabase/server";
-import { FEED_COLUMNS, timeAgo, type PrayerRequest, type RequestUpdate } from "@/lib/types";
+import { FEED_COLUMNS, timeAgo, type Adoption, type PrayerRequest, type RequestUpdate } from "@/lib/types";
+import { adoptionDay, todayIn } from "@/lib/watch";
 import { verseFor } from "@/lib/verses";
 import { isCrisis } from "@/lib/moderation";
 import { CrisisNotice, LocalHelpNotice } from "@/components/HelpNotices";
 import { Guide } from "@/components/Guide";
-import { PrayPanel } from "./PrayPanel";
+import { PrayPanel, type AdoptionState } from "./PrayPanel";
+import { CircleLeaderRemove } from "./CircleLeaderRemove";
 import { OwnerPanel } from "./OwnerPanel";
 import { ReportButton } from "./ReportButton";
 
@@ -28,16 +30,36 @@ export default async function RequestPage({ params }: PageProps<"/r/[id]">) {
   if (!request) notFound();
   const { data: updates } = await supabase.from("request_updates").select("*").eq("request_id", id).order("created_at");
   let prayed = false;
+  let adoption: AdoptionState = null;
   if (user) {
-    const { data: p } = await supabase.from("prayers").select("request_id").eq("request_id", id).eq("warrior_id", user.id).maybeSingle();
+    const [{ data: p }, { data: a }] = await Promise.all([
+      supabase.from("prayers").select("request_id").eq("request_id", id).eq("warrior_id", user.id).maybeSingle(),
+      supabase.from("adoptions").select("request_id, timezone, started_on, days_prayed").eq("request_id", id).maybeSingle<Adoption>(),
+    ]);
     prayed = !!p;
+    if (a) {
+      const today = todayIn(a.timezone);
+      const day = adoptionDay(a.started_on, today);
+      if (day) adoption = { day, daysPrayed: a.days_prayed.length, prayedToday: a.days_prayed.includes(today) };
+    }
+  }
+  let circle: { name: string; leader: boolean } | null = null;
+  if (request.circle_id) {
+    const [{ data: c }, { data: leader }] = await Promise.all([
+      supabase.from("circles").select("name").eq("id", request.circle_id).maybeSingle<{ name: string }>(),
+      supabase.rpc("is_circle_leader", { p_circle: request.circle_id }),
+    ]);
+    circle = { name: c?.name ?? "your circle", leader: !!leader };
   }
   const who = request.display_name || "Anonymous";
   const verse = verseFor(request.categories, request.id);
 
   return (
     <div className="stack-lg" style={{ maxWidth: 720 }}>
-      <Link href="/" className="btn btn-quiet" style={{ justifySelf: "start" }}>← Back to all requests</Link>
+      <Link href={request.circle_id ? `/circles/${request.circle_id}` : "/"} className="btn btn-quiet" style={{ justifySelf: "start" }}>
+        ← Back to {circle ? circle.name : "all requests"}
+      </Link>
+      {circle && <p className="tip">Shared only with the members of {circle.name}.</p>}
       {isCrisis(request.flags) && <CrisisNotice forRequester={isMine} />}
       <article className={`card request-card${request.is_urgent ? " urgent" : ""}`}>
         <div className="request-head">
@@ -52,6 +74,9 @@ export default async function RequestPage({ params }: PageProps<"/r/[id]">) {
           <div className="chips">{request.categories.map((c) => <span key={c} className="tag">{c}</span>)}</div>
         )}
         <p className="count"><b>{request.prayer_count}</b> {request.prayer_count === 1 ? "person has prayed" : "people have prayed"} for {isMine ? "you" : "this"}</p>
+        {request.adopted_count > 0 && (
+          <p className="count"><b>{request.adopted_count}</b> {request.adopted_count === 1 ? "person has" : "people have"} promised to pray {isMine ? "for you " : ""}every day for a week</p>
+        )}
       </article>
 
       {(updates as RequestUpdate[] | null)?.length ? (
@@ -79,11 +104,12 @@ export default async function RequestPage({ params }: PageProps<"/r/[id]">) {
               <>When you finish, tap <strong>Amen, I prayed</strong>.</>,
             ]}
           />
-          <PrayPanel requestId={request.id} who={who} verse={verse} signedIn={!!user} alreadyPrayed={prayed} />
+          <PrayPanel requestId={request.id} who={who} verse={verse} signedIn={!!user} alreadyPrayed={prayed} adoption={adoption} />
         </>
       )}
       <LocalHelpNotice categories={request.categories} forRequester={isMine} />
       {!isMine && user && <ReportButton requestId={request.id} />}
+      {!isMine && circle?.leader && request.circle_id && <CircleLeaderRemove requestId={request.id} circleId={request.circle_id} />}
     </div>
   );
 }

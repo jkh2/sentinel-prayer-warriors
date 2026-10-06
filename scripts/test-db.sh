@@ -8,4 +8,4 @@ createdb "$DB"
 trap 'dropdb --if-exists "$DB"' EXIT
 psql -q -v ON_ERROR_STOP=1 -d "$DB" -f supabase/tests/stub_supabase.sql
 for f in supabase/migrations/*.sql; do psql -q -v ON_ERROR_STOP=1 -d "$DB" -f "$f"; done
-psql -q -v ON_ERROR_STOP=1 -d "$DB" -f supabase/tests/policies_test.sql
+for f in supabase/tests/policies_test.sql supabase/tests/round2_test.sql; do psql -q -v ON_ERROR_STOP=1 -d "$DB" -f "$f"; done
