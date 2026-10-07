@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import { FACEBOOK_ON, SignInButtons } from "./SignInButtons";
+import { FACEBOOK_ON } from "@/lib/facebook";
+import { SignInButtons } from "./SignInButtons";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -9,7 +9,6 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const next = typeof sp.next === "string" ? sp.next : "/";
   return (
     <div className="stack-lg" style={{ maxWidth: 560 }}>
-      <Image src="/sentinel-mark.webp" alt="" width={140} height={140} style={{ borderRadius: "50%", filter: "drop-shadow(0 0 18px rgba(245,197,66,.45))" }} />
       <div className="hero">
         <h1>Sign in to pray and ask for prayer</h1>
         <p>Use the {FACEBOOK_ON ? "Google or Facebook" : "Google"} account you already have. There is no new password to remember.</p>

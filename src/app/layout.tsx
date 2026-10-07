@@ -27,23 +27,25 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <div className="wrap">
             <div className="bar">
               <Link href="/" className="brand">
-                <Image src="/sentinel-mark-small.png" alt="" width={40} height={34} priority />
-                <span className="brand-name">Sentinel Prayer Warriors</span>
+                <Image src="/sentinel-mark-nav.png" alt="" width={40} height={34} priority />
+                <span className="brand-name">Sentinel <span>Prayer Warriors</span></span>
               </Link>
-              {user ? (
-                <div className="row" style={{ gap: 4 }}>
-                  <Link href="/inbox" className="btn btn-quiet inbox-link" aria-label={unread ? `Inbox, ${unread} new` : "Inbox"}>
-                    <BellIcon /> Inbox{unread > 0 && <span className="unread">{unread > 99 ? "99+" : unread}</span>}
-                  </Link>
-                  <form action="/auth/signout" method="post">
-                    <button className="btn btn-quiet" type="submit">Sign out</button>
-                  </form>
-                </div>
-              ) : (
-                <Link href="/login" className="btn btn-primary">Sign in</Link>
-              )}
+              <div className="bar-actions">
+                {user ? (
+                  <>
+                    <Link href="/inbox" className="btn btn-quiet inbox-link" aria-label={unread ? `Inbox, ${unread} new` : "Inbox"}>
+                      <BellIcon /> Inbox{unread > 0 && <span className="unread">{unread > 99 ? "99+" : unread}</span>}
+                    </Link>
+                    <form action="/auth/signout" method="post" className="bar-signout">
+                      <button className="btn btn-quiet" type="submit">Sign out</button>
+                    </form>
+                  </>
+                ) : (
+                  <Link href="/login" className="btn btn-primary sign-in">Sign in</Link>
+                )}
+                <Nav signedIn={!!user} isWarrior={!!profile?.is_warrior} isAdmin={!!profile?.is_admin} />
+              </div>
             </div>
-            <Nav signedIn={!!user} isWarrior={!!profile?.is_warrior} isAdmin={!!profile?.is_admin} />
           </div>
         </header>
         <main className="wrap">{children}</main>

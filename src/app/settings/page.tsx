@@ -17,7 +17,7 @@ export default async function SettingsPage() {
       <ProfileForm profile={profile} interests={(data ?? []).map((i) => i.label)} mode="settings" />
       <section className="stack">
         <h2>Step-by-step guides</h2>
-        <p className="muted">If you hid the blue “how this works” boxes, you can bring them back here.</p>
+        <p className="muted">If you hid the gold “how this works” boxes, you can bring them back here.</p>
         <div><ShowGuidesAgain /></div>
       </section>
       <hr className="gold-rule" />

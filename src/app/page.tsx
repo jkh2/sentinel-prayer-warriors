@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { getViewer } from "@/lib/supabase/server";
 import { FEED_COLUMNS, type PrayerRequest } from "@/lib/types";
@@ -32,15 +31,12 @@ export default async function FeedPage() {
   }
   return (
     <div className="stack-lg">
-      <div className="mark-hero">
-        <Image src="/sentinel-mark.webp" alt="The Sentinel mark: a glowing golden triangle" width={220} height={220} priority />
-        <div className="hero">
-          <h1>People asking for prayer right now</h1>
-          <p>Every card is a real person with a real need. Choose one, pray for them by name, and let them know they are not alone.</p>
-          <div className="row">
-            <Link href="/ask" className="btn btn-primary">Ask for prayer</Link>
-            <Link href="/three" className="btn">Give me three people to pray for</Link>
-          </div>
+      <div className="hero">
+        <h1>People asking for prayer right now</h1>
+        <p>Every card is a real person with a real need. Choose one, pray for them by name, and let them know they are not alone.</p>
+        <div className="row">
+          <Link href="/ask" className="btn btn-primary">Ask for prayer</Link>
+          <Link href="/three" className="btn">Give me three people to pray for</Link>
         </div>
       </div>
       <hr className="gold-rule" />

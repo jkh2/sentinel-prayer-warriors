@@ -49,16 +49,43 @@ p { margin: 0; }
 
 /* header and navigation */
 .site-header { background: rgba(6,5,4,.92); backdrop-filter: blur(8px); border-bottom: 1px solid transparent; border-image: linear-gradient(90deg, transparent, var(--gold-deep) 20%, var(--gold-bright) 50%, var(--gold-deep) 80%, transparent) 1; position: sticky; top: 0; z-index: 10; }
-.site-header .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding-block: 12px; }
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-.brand-name { font-family: var(--font-display); font-size: 1.3rem; background: var(--gold-metal); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.brand img { filter: drop-shadow(0 0 6px rgba(245,197,66,.6)); }
-.nav { display: flex; flex-wrap: wrap; gap: 4px; padding-block: 0 8px; }
+.site-header .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-block: 12px 4px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; min-width: 0; }
+.brand img { flex: none; filter: drop-shadow(0 0 6px rgba(245,197,66,.6)); }
+.brand-name { font-family: var(--font-display); font-size: 1.3rem; line-height: 1.15; background: var(--gold-metal); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.brand-name span { white-space: nowrap; }
+.bar-actions { display: contents; }
+.site-header .menu-btn, .nav-signout { display: none; }
+.nav { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 4px; padding-block: 4px 4px; }
 .nav a { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 999px; text-decoration: none; font-weight: 700; white-space: nowrap; color: var(--muted); min-height: 48px; }
 .nav a[aria-current="page"] { background: var(--gold-metal); color: var(--accent-ink); box-shadow: var(--glow); }
 .nav a:hover { background: var(--surface-2); }
 .nav a[aria-current="page"]:hover { background: var(--gold-metal); }
 main { padding-block: 24px 64px; }
+:root { --header-h: 190px; }
+
+/* Phones: one short header row (logo, Inbox, Menu); the links open as a grid of big buttons. */
+@media (max-width: 720px) {
+  .site-header .bar { gap: 4px; padding-block: 8px; }
+  .brand { gap: 8px; }
+  .brand-name { display: grid; font-size: 1.05rem; }
+  .bar-signout { display: none; }
+  .bar-actions > .btn-quiet { flex-direction: column; gap: 0; min-height: 52px; min-width: 56px; padding: 4px 6px; font-size: .78rem; line-height: 1.2; color: var(--gold-bright); }
+  .inbox-link .unread { position: absolute; top: 0; right: 0; min-width: 22px; height: 22px; font-size: .75rem; padding: 0 5px; }
+  .site-header .sign-in { min-height: 44px; padding: 6px 14px; font-size: .88rem; }
+  .site-header .menu-btn { display: inline-flex; }
+  .nav { display: none; }
+  .nav.open { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-block: 4px 12px; }
+  .nav.open a { justify-content: center; text-align: center; white-space: normal; min-height: 56px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); }
+  .nav.open a[aria-current="page"] { background: var(--gold-metal); color: var(--accent-ink); border-color: #e0a92e; }
+  .nav-signout { display: block; grid-column: 1 / -1; }
+  .nav-signout .btn { width: 100%; border: 2px solid var(--line); min-height: 52px; }
+  :root { --header-h: 72px; }
+  /* Full-width buttons on phones: easy to hit, and no more ragged rows of different-sized buttons. */
+  main .btn:not(.btn-quiet):not(.new-banner) { width: 100%; }
+}
+@media (max-width: 370px) { .nav.open { grid-template-columns: 1fr; } .brand { gap: 6px; } .brand-name { font-size: .9rem; } .brand img { width: 34px; height: auto; } .site-header .sign-in { padding-inline: 10px; } }
+@media (max-width: 340px) { .brand-name { font-size: .8rem; } .brand img { width: 28px; } .bar-actions > .btn-quiet { min-width: 48px; } .site-header .sign-in { padding-inline: 8px; } }
 .site-footer { border-top: 1px solid var(--line); padding-block: 20px 40px; color: var(--muted); font-size: .88rem; }
 
 /* buttons */
@@ -133,7 +160,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 36px; }
 .live { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; color: var(--muted); }
 .live i { width: 12px; height: 12px; border-radius: 50%; background: var(--prayed); animation: glow 2.4s infinite; }
 @keyframes glow { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--prayed) 60%, transparent); } 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
-.new-banner { position: sticky; top: 140px; z-index: 5; justify-self: center; }
+.new-banner { position: sticky; top: calc(var(--header-h) + 12px); z-index: 5; justify-self: center; }
 .empty { text-align: center; color: var(--muted); padding: 40px 20px; border: 2px dashed var(--line); border-radius: var(--radius); display: grid; gap: 8px; justify-items: center; }
 .empty h2, .empty h3 { color: var(--ink); }
 
@@ -159,13 +186,7 @@ dialog::backdrop { background: rgb(0 0 0 / .45); }
 table.admin { width: 100%; border-collapse: collapse; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 
-/* the Sentinel mark */
-.mark-hero { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 24px; align-items: center; }
-.mark-hero img { width: 100%; height: auto; border-radius: 50%; animation: breathe 6s ease-in-out infinite; }
-@keyframes breathe { 0%, 100% { filter: drop-shadow(0 0 10px rgba(245,197,66,.25)); } 50% { filter: drop-shadow(0 0 28px rgba(245,197,66,.55)); } }
-@media (max-width: 640px) { .mark-hero { grid-template-columns: 1fr; justify-items: center; text-align: center; } .mark-hero img { max-width: 180px; } .mark-hero p { margin-inline: auto; } }
 .gold-rule { height: 1px; border: 0; background: linear-gradient(90deg, transparent, var(--gold-deep), var(--gold-bright), var(--gold-deep), transparent); margin: 0; }
-@media (max-width: 480px) { .brand-name { font-size: 1.05rem; } .site-header .bar .btn { min-height: 44px; padding-inline: 16px; } .nav a { padding: 8px 12px; } }
 
 /* inbox */
 .inbox-link { position: relative; color: var(--gold-bright); }
