@@ -72,7 +72,7 @@ main { padding-block: 24px 64px; }
   .bar-signout { display: none; }
   .bar-actions > .btn-quiet { flex-direction: column; gap: 0; min-height: 52px; min-width: 56px; padding: 4px 6px; font-size: .78rem; line-height: 1.2; color: var(--gold-bright); }
   .inbox-link .unread { position: absolute; top: 0; right: 0; min-width: 22px; height: 22px; font-size: .75rem; padding: 0 5px; }
-  .site-header .sign-in { min-height: 44px; padding: 6px 14px; font-size: .88rem; }
+  .site-header .sign-in { min-height: 44px; padding: 6px 12px; font-size: .88rem; }
   .site-header .menu-btn { display: inline-flex; }
   .nav { display: none; }
   .nav.open { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-block: 4px 12px; }
@@ -84,8 +84,11 @@ main { padding-block: 24px 64px; }
   /* Full-width buttons on phones: easy to hit, and no more ragged rows of different-sized buttons. */
   main .btn:not(.btn-quiet):not(.new-banner) { width: 100%; }
 }
-@media (max-width: 370px) { .nav.open { grid-template-columns: 1fr; } .brand { gap: 6px; } .brand-name { font-size: .9rem; } .brand img { width: 34px; height: auto; } .site-header .sign-in { padding-inline: 10px; } }
-@media (max-width: 340px) { .brand-name { font-size: .8rem; } .brand img { width: 28px; } .bar-actions > .btn-quiet { min-width: 48px; } .site-header .sign-in { padding-inline: 8px; } }
+/* Smaller phones: step the logo and name down so the header stays one row. */
+@media (max-width: 389px) { .brand { gap: 6px; } .brand-name { font-size: .9rem; } .brand img { width: 42px; height: auto; } .site-header .sign-in { padding-inline: 10px; } }
+@media (max-width: 370px) { .nav.open { grid-template-columns: 1fr; } }
+@media (max-width: 355px) { .brand img { width: 30px; } }
+@media (max-width: 343px) { .brand-name { font-size: .8rem; } .brand img { width: 28px; } .bar-actions > .btn-quiet { min-width: 48px; } .site-header .sign-in { padding-inline: 8px; } }
 .site-footer { border-top: 1px solid var(--line); padding-block: 20px 40px; color: var(--muted); font-size: .88rem; }
 .footer-maker a { display: inline-block; padding-block: 6px; font-weight: 700; letter-spacing: .14em; text-decoration: none; }
 .footer-maker a:hover { text-decoration: underline; }
