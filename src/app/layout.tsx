@@ -27,7 +27,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <div className="wrap">
             <div className="bar">
               <Link href="/" className="brand">
-                <Image src="/sentinel-mark-nav.png" alt="" width={40} height={34} priority />
+                <Image src="/sentinel-shield-nav.png" alt="" width={38} height={42} priority />
                 <span className="brand-name">Sentinel <span>Prayer Warriors</span></span>
               </Link>
               <div className="bar-actions">
