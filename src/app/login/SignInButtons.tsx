@@ -1,9 +1,7 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-
-// Facebook stays hidden until its login is switched on in Supabase and NEXT_PUBLIC_FACEBOOK_LOGIN=on is set.
-export const FACEBOOK_ON = process.env.NEXT_PUBLIC_FACEBOOK_LOGIN === "on";
+import { FACEBOOK_ON } from "@/lib/facebook";
 
 export function SignInButtons({ next }: { next: string }) {
   const [busy, setBusy] = useState<string | null>(null);
