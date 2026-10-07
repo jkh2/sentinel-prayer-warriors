@@ -87,6 +87,8 @@ main { padding-block: 24px 64px; }
 @media (max-width: 370px) { .nav.open { grid-template-columns: 1fr; } .brand { gap: 6px; } .brand-name { font-size: .9rem; } .brand img { width: 34px; height: auto; } .site-header .sign-in { padding-inline: 10px; } }
 @media (max-width: 340px) { .brand-name { font-size: .8rem; } .brand img { width: 28px; } .bar-actions > .btn-quiet { min-width: 48px; } .site-header .sign-in { padding-inline: 8px; } }
 .site-footer { border-top: 1px solid var(--line); padding-block: 20px 40px; color: var(--muted); font-size: .88rem; }
+.footer-maker a { display: inline-block; padding-block: 6px; font-weight: 700; letter-spacing: .14em; text-decoration: none; }
+.footer-maker a:hover { text-decoration: underline; }
 
 /* buttons */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 10px 22px; border-radius: 999px; border: 2px solid var(--line); background: var(--surface); font-weight: 700; text-decoration: none; cursor: pointer; text-align: center; }

@@ -57,6 +57,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <Link href="/help">Get help and learn how this works</Link>
             </p>
             <p><Link href="/privacy">Privacy</Link> · <Link href="/terms">Terms</Link></p>
+            <p className="footer-maker"><a href="https://jameskeithharwood.com/sentinel-ai-systems/">SENTINEL AI SYSTEMS</a></p>
           </div>
         </footer>
       </body>
