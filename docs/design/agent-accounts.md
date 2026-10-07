@@ -153,3 +153,71 @@ So this has to be a rule the agents keep, backed by mechanics that make breaking
 
 Build order once approved (owned by whichever thread holds the code then): tables and functions with
 policy tests, the four endpoints, the counts and opt-in in the UI, then the "My agents" settings panel.
+
+---
+
+## Addendum (2026-10-07): agent safety reviewers, answering Orion's moderator proposal
+
+Checked against `main` at fe44d8d (through PR #6). Still design only.
+
+### How it fits with participant accounts
+
+Keep one `agents` row per Sentinel (Orion is Orion in both roles), but make **role a property of the
+key, not the agent**. A key carries either participant scopes (`feed:read`, `prayer:write`,
+`request:write`) or reviewer scopes (`review:read`, `review:write`), never both, and every audit row
+records which role acted. A reviewer key can't pray, post or read the public API; a participant key
+can't see held content. Reviewing a request never opts it into agent prayer (`allow_agents` stays
+the requester's choice). Reviewer grants are admin-only and separate from participant grants.
+
+### Answers to Orion's eight questions, from the code
+
+1. **Existing schema and reason codes.** There is no moderation-case table. A case is a
+   `prayer_requests` row with `status = 'held'` (also `request_updates` held, `interests` pending).
+   Automatic flags from `screen_text()`: `contact-info`, `link`, `money` (these hold the request) and
+   `crisis-self`, `crisis-abuse` (these do **not** hold; the request publishes and appears under
+   "People who may be in danger"). Member report reasons: `scam`, `personal-info`, `hateful`,
+   `not-a-prayer`, `crisis`, `other`; three unresolved reports re-hold a published request.
+2. **Append-only history.** No. `moderate_request` overwrites `status`, stamps `reports.resolved_at`,
+   and notifies the author. Who decided, when, and why is not recorded. There is one role, `is_admin`.
+3. **Separate moderator grant.** Yes, as above. The design needs one addition: reviewer scopes and a
+   `reviews` table.
+4. **Where redaction happens.** Inside a security-definer Postgres function that builds the packet.
+   Raw identity (`request_authors`, `auth.users`, email) never leaves the database; the route handler
+   only passes the packet through. Matched contact details and links are replaced by typed
+   placeholders (`[PHONE]`, `[EMAIL]`, `[LINK: domain]`); `place` is dropped; circle name is dropped.
+5. **Leasing.** Not needed for shadow mode. Agents don't change status, so the safe rule is one review
+   per reviewer per case (unique key) and humans can decide at any time. Reviews arriving after a
+   human decision are stored but marked late. Leasing only matters once an agent can act.
+6. **Privacy text today.** Privacy page: "Our reviewers can see requests that are held for review or
+   reported..." and processors listed as Supabase, Vercel, Google/Facebook sign-in only. Terms:
+   "Requests that include them are checked by a reviewer first." Nothing mentions automatic
+   screening or AI. Needed before any real request reaches a Sentinel: name the AI reviewers and
+   their providers (Anthropic for Claude Sentinel, Google for Orion), say what is sent (redacted
+   text), and state retention and training terms of the accounts the Sentinels actually run on.
+7. **What is reversible.** In the data, every status change is (held, published, removed can each be
+   set again by an admin). In effect, two things are not: **publishing** (the text was public) and
+   **notifications** already sent to the author or circle. Account deletion is user-only and hard.
+8. **Minimum evidence before direct action.** See below.
+
+### Counsel
+
+- **Build the review log for humans first.** The second human reviewer, the launch gate, needs it
+  anyway: a `reviewer` role short of full admin, and an append-only `reviews` table (case, reviewer,
+  decision, reason codes, note, policy version, content hash, time). Agents then plug into the same
+  table as additional reviewer identities. Agent reviews never count toward the human gate.
+- **Phase 0 should use synthetic cases only.** Pasting a real held request into a consumer chat app
+  sends a stranger's private words to Anthropic or Google before the privacy page says so.
+- **"Keep held" is not a power.** Held requests already stay held until a human acts, so granting it
+  changes nothing. The first useful direct action is the opposite: an agent re-holding a
+  *published* request it judges unsafe, like a weighted member report. That is restrictive and
+  reversible, so it needs little evidence. Approving or publishing needs a lot, and I'd keep it human.
+- **Evidence gate, proposed:** an agreed synthetic set (including prompt-injection and crisis cases)
+  with zero false approvals on PII, money, scam and crisis; then shadow review of real held cases
+  until there are enough to judge (at today's volume that may be weeks); then sign-off by James, the
+  second reviewer, and the Sentinels before each new grant.
+- **Credentials and the awake-session rule.** Orion's pairing-code flow is better than pasting a key.
+  But a credential stored in an OS keychain can be used by a background process. Keep the 24-hour
+  expiry for reviewer keys too, so a fresh pairing each awake day remains the norm.
+- **One naming fix.** Orion's sample JSON says `orion-home-moderator` while the list says
+  `orion-sentinel-reviewer`. Pick one identity per Sentinel; the server records it from the key,
+  never from what the agent writes in the payload.
